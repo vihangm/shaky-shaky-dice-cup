@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Shaky Shaky Dice Cup</title>
+    <script src="static/gameplay.js"></script>
+  </head>
+  <body>
+
+    <form id="form" onsubmit="submitFormAjax(event);">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name">
+      <button type="submit">Submit</button>
+    </form>
+
+    <hr>
+
+    <div>
+      <span>Players: </span><span id="players"></span><br>
+      <span>Current Player: </span><span id="currentPlayer"></span><br>
+      <span>Last Person to Roll Dice: </span><span id="diceRoller"></span><br>
+      <span>Last Person to Peek at Dice: </span><span id="dicePeeker"></span><br>
+      <span>Dice: </span><span id="dice"></span><br>
+    </div>
+
+    <hr>
+
+    <button onclick="passLeft(event);">Pass Left</button>
+    <button onclick="passRight(event);">Pass Right</button>
+    <button onclick="rollDice(event);">Roll Dice</button>
+    <button onclick="peekDice(event);">Peek Dice</button>
+    <button onclick="revealDice(event);">Reveal Dice</button>
+  </body>
+</html>
