@@ -1,5 +1,4 @@
 import json
-import math
 import random
 import zlib
 
@@ -78,7 +77,6 @@ class SortedDoublyLinkedList:
             self.min_node = node.next
         node.remove()
 
-
     def names(self):
         names = []
         node = self.min_node
@@ -131,7 +129,6 @@ class GameState:
         self.players_by_name = dict()
         self.players_by_client = dict()
 
-
     def roll_die(self, client):
         print('roll_die')
         if self.current_player is None or self.current_player.client != client:
@@ -142,7 +139,6 @@ class GameState:
         self.last_person_to_roll_dice = self.current_player.name
         return True
 
-
     def pass_left(self, client):
         print('pass_left')
         if self.current_player is None or self.current_player.client != client:
@@ -151,7 +147,6 @@ class GameState:
         self.current_player = self.current_player.prev
         return True
 
-
     def pass_right(self, client):
         print('pass_right')
         if self.current_player is None or self.current_player.client != client:
@@ -159,7 +154,6 @@ class GameState:
 
         self.current_player = self.current_player.next
         return True
-
 
     def add_player(self, client, name):
         print('add_player')
@@ -180,7 +174,6 @@ class GameState:
             self.current_player = player
         return True
 
-
     def remove_player(self, player):
         print('remove_player')
         del self.players_by_name[player.name]
@@ -193,7 +186,6 @@ class GameState:
             self.current_player = None
         return True
 
-
     def update_active_clients(self, curr_client, ws_clients):
         print('update_active_clients')
         state_changed = False
@@ -202,7 +194,6 @@ class GameState:
                 self.remove_player(self.players_by_client[client])
                 state_changed = True
         return state_changed
-
 
     def summarize_state_for_client(self, client, peek_dice=False, reveal_dice=False):
         print('summarize_state_for_client')
@@ -270,6 +261,7 @@ def game_socket(ws):
         if state_changed:
             for client_addr, client in ws.handler.server.clients.items():
                 client.ws.send(json.dumps(gs.summarize_state_for_client(client_addr)))
+
 
 @app.route('/')
 def index():
