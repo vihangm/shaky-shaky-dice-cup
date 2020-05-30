@@ -1,4 +1,5 @@
 import json
+import math
 import random
 import zlib
 
@@ -10,11 +11,91 @@ app = Flask(__name__)
 sockets = Sockets(app)
 
 
-class Player:
+class Node:
+    def __init__(self):
+        self.prev = None
+        self.next = None
+
+    def insert_before(self, other):
+        if other is None:
+            self.prev = self
+            self.next = self
+            return
+
+        self.prev = other.prev
+        self.next = other
+
+        other.prev.next = self
+        other.prev = self
+
+    def insert_after(self, other):
+        if other is None:
+            self.prev = self
+            self.next = self
+            return
+
+        self.prev = other
+        self.next = other.next
+
+        other.next.prev = self
+        other.next = self
+
+    def remove(self):
+        if self.prev is self or self.next is self:
+            return
+
+        self.next.prev = self.prev
+        self.prev.next = self.next
+
+
+class SortedDoublyLinkedList:
+    def __init__(self):
+        self.min_node = None
+        self.length = 0
+
+    def insert(self, node):
+        self.length += 1
+        if self.min_node is None or node < self.min_node:
+            node.insert_before(self.min_node)
+            self.min_node = node
+            return
+
+        curr_node = self.min_node
+        while node > curr_node:
+            curr_node = curr_node.next
+            if curr_node is self.min_node:
+                break
+
+        node.insert_before(curr_node)
+
+    def remove(self, node):
+        self.length -= 1
+        if self.length == 0:
+            self.min_node = None
+            return
+
+        if node is self.min_node:
+            self.min_node = node.next
+        node.remove()
+
+
+    def names(self):
+        names = []
+        node = self.min_node
+        while node is not None:
+            names.append(node.name)
+            node = node.next
+            if node is self.min_node:
+                break
+        return names
+
+
+class Player(Node):
     def __init__(self, client, name):
         self.client = client
         self.name = name
         self.name_crc = zlib.crc32(name.encode())
+        Node.__init__(self)
 
     def __hash__(self):
         return self.client(1)
@@ -40,47 +121,43 @@ class Player:
 
 class GameState:
     def __init__(self):
-        self.current_player_idx = 0
+        self.current_player = None
         self.last_person_to_roll_dice = ''
         self.last_person_to_peek_at_dice = ''
         self.dice_roll_count = 0
 
         self.current_dice = (3, 1)
-        self.ordered_players = list()
+        self.ordered_players = SortedDoublyLinkedList()
         self.players_by_name = dict()
         self.players_by_client = dict()
 
 
     def roll_die(self, client):
         print('roll_die')
-        if self.ordered_players[self.current_player_idx].client != client:
+        if self.current_player is None or self.current_player.client != client:
             return False
 
         self.dice_roll_count += 1
         self.current_dice = (random.randrange(6) + 1, random.randrange(6) + 1)
-        self.last_person_to_roll_dice = self.players_by_client[client].name
+        self.last_person_to_roll_dice = self.current_player.name
         return True
 
 
     def pass_left(self, client):
         print('pass_left')
-        if self.ordered_players[self.current_player_idx].client != client:
+        if self.current_player is None or self.current_player.client != client:
             return False
 
-        self.current_player_idx -= 1
-        if self.current_player_idx < 0:
-            self.current_player_idx += len(self.ordered_players)
+        self.current_player = self.current_player.prev
         return True
 
 
     def pass_right(self, client):
         print('pass_right')
-        if self.ordered_players[self.current_player_idx].client != client:
+        if self.current_player is None or self.current_player.client != client:
             return False
 
-        self.current_player_idx += 1
-        if self.current_player_idx >= len(self.ordered_players):
-            self.current_player_idx -= len(self.ordered_players)
+        self.current_player = self.current_player.next
         return True
 
 
@@ -98,24 +175,22 @@ class GameState:
         self.players_by_name[name] = player
         self.players_by_client[client] = player
 
-        self.ordered_players.append(player)
-        # sorting would need us to track current player
-        # self.ordered_players.sort()
+        self.ordered_players.insert(player)
+        if self.current_player is None:
+            self.current_player = player
         return True
 
 
     def remove_player(self, player):
         print('remove_player')
-        if player not in self.ordered_players:
-            print('No such player')
-            return False
-
         del self.players_by_name[player.name]
         del self.players_by_client[player.client]
 
+        if self.current_player is player:
+            self.current_player = player.next
         self.ordered_players.remove(player)
-        if self.current_player_idx > len(self.ordered_players):
-            self.current_player_idx = 0
+        if self.ordered_players.length == 0:
+            self.current_player = None
         return True
 
 
@@ -131,24 +206,16 @@ class GameState:
 
     def summarize_state_for_client(self, client, peek_dice=False, reveal_dice=False):
         print('summarize_state_for_client')
-        if self.ordered_players[self.current_player_idx].client != client:
+        if self.current_player is None or self.current_player.client != client:
             peek_dice = False
             reveal_dice = False
 
-        current_player = ''
-        if self.current_player_idx < len(self.ordered_players):
-            current_player = self.ordered_players[self.current_player_idx].name
-
-        client_name = ''
-        if client in self.players_by_client:
-            client_name = self.players_by_client[client].name
-
         summary = {
-            'players': [player.name for player in self.ordered_players],
-            'current_player': current_player,
+            'players': self.ordered_players.names(),
+            'current_player': self.current_player.name if self.current_player is not None else '',
             'last_person_to_roll_dice': self.last_person_to_roll_dice,
             'last_person_to_peek_at_dice': self.last_person_to_peek_at_dice,
-            'player_name_for_client': client_name,
+            'player_name_for_client': self.players_by_client[client].name if client in self.players_by_client else '',
             'dice_roll_count': self.dice_roll_count,
         }
 

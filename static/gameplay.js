@@ -21,17 +21,27 @@ var updateState = function(stateStr) {
   var dicePeekerEl = document.querySelector('#dicePeeker');
 
   state = JSON.parse(stateStr);
-  formEl.name.value = state['player_name_for_client'];
+  if (state['player_name_for_client'] && state['player_name_for_client'] != '') {
+    formEl.name.value = state['player_name_for_client'];
+    if (formEl.querySelector('button')) {
+      formEl.querySelector('input#name').setAttribute('readonly', 'readonly')
+      formEl.querySelector('button').remove();
+    }
+  }
   if (state['dice']) {
     diceEl.innerHTML = state['dice'];
   } else if (state['dice_roll_count'] != diceRollCount) {
     diceEl.innerHTML = 'SECRETSSSSSSS!'
   }
   diceRollCount = state['dice_roll_count'];
+
   playersEl.innerHTML = state['players'];
   currentPlayerEl.innerHTML = state['current_player'];
   diceRollerEl.innerHTML = state['last_person_to_roll_dice'];
   dicePeekerEl.innerHTML = state['last_person_to_peek_at_dice'];
+
+  var enableButtons = state['current_player'] == state['player_name_for_client'];
+  document.querySelectorAll('.modifiers').forEach(function(b) { b.disabled = !enableButtons; });
 };
 
 websocket.onopen = function() {

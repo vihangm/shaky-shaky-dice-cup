@@ -3,31 +3,42 @@
   <head>
     <title>Shaky Shaky Dice Cup</title>
     <script src="static/gameplay.js"></script>
+    <link href="static/style.css" rel="stylesheet">
   </head>
   <body>
+    <div id="view">
+      <form id="form" onsubmit="submitFormAjax(event);">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name">
+        <button type="submit">Submit</button>
+      </form>
 
-    <form id="form" onsubmit="submitFormAjax(event);">
-      <label for="name">Name:</label>
-      <input type="text" id="name" name="name">
-      <button type="submit">Submit</button>
-    </form>
+      <hr>
 
-    <hr>
+      <div id="gamestate">
+        <label class="state-label">Players: </label>
+        <span id="players"></span>
+        <br>
+        <label class="state-label">Current Player: </label>
+        <span id="currentPlayer"></span>
+        <br>
+        <label class="state-label">Last Person to Roll Dice: </label>
+        <span id="diceRoller"></span>
+        <br>
+        <label class="state-label">Last Person to Peek at Dice: </label>
+        <span id="dicePeeker"></span>
+        <br>
+        <label class="state-label">Dice: </label>
+        <span id="dice"></span>
+      </div>
 
-    <div>
-      <span>Players: </span><span id="players"></span><br>
-      <span>Current Player: </span><span id="currentPlayer"></span><br>
-      <span>Last Person to Roll Dice: </span><span id="diceRoller"></span><br>
-      <span>Last Person to Peek at Dice: </span><span id="dicePeeker"></span><br>
-      <span>Dice: </span><span id="dice"></span><br>
+      <hr>
+
+      <button class="modifiers" onclick="passLeft(event);">Pass Left</button>
+      <button class="modifiers" onclick="passRight(event);">Pass Right</button>
+      <button class="modifiers" onclick="rollDice(event);">Roll Dice</button>
+      <button class="modifiers" onclick="peekDice(event);">Peek Dice</button>
+      <button class="modifiers" onclick="revealDice(event);">Reveal Dice</button>
     </div>
-
-    <hr>
-
-    <button onclick="passLeft(event);">Pass Left</button>
-    <button onclick="passRight(event);">Pass Right</button>
-    <button onclick="rollDice(event);">Roll Dice</button>
-    <button onclick="peekDice(event);">Peek Dice</button>
-    <button onclick="revealDice(event);">Reveal Dice</button>
   </body>
 </html>
