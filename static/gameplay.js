@@ -40,7 +40,7 @@ var updateState = function(stateStr) {
   diceRollerEl.innerHTML = state['last_person_to_roll_dice'];
   dicePeekerEl.innerHTML = state['last_person_to_peek_at_dice'];
 
-  var enableButtons = state['current_player'] == state['player_name_for_client'];
+  var enableButtons = state['current_player'] == formEl.name.value;
   document.querySelectorAll('.modifiers').forEach(function(b) { b.disabled = !enableButtons; });
 };
 

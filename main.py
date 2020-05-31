@@ -212,6 +212,8 @@ class GameState:
 
         if peek_dice or reveal_dice:
             summary['dice'] = self.current_dice
+
+        if peek_dice:
             self.last_person_to_peek_at_dice = self.players_by_client[client].name
 
         if reveal_dice:
@@ -243,6 +245,7 @@ def game_socket(ws):
 
         elif parsed['method'] == 'reveal_dice':
             summary = gs.summarize_state_for_client(ws.handler.client_address, reveal_dice=True)
+            del summary['player_name_for_client']
             for client in ws.handler.server.clients.values():
                 client.ws.send(json.dumps(summary))
 
