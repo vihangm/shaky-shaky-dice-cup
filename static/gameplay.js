@@ -46,6 +46,7 @@ var updateState = function(stateStr) {
 
 websocket.onopen = function() {
   console.log('Connected');
+  websocket.send(JSON.stringify({'method': 'init_state'}));
 };
 
 websocket.onclose = function() {

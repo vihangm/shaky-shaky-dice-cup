@@ -201,6 +201,12 @@ class GameState:
             peek_dice = False
             reveal_dice = False
 
+        if peek_dice:
+            self.last_person_to_peek_at_dice = self.players_by_client[client].name
+
+        if reveal_dice:
+            self.last_person_to_peek_at_dice = 'Everyone!'
+
         summary = {
             'players': self.ordered_players.names(),
             'current_player': self.current_player.name if self.current_player is not None else '',
@@ -213,11 +219,6 @@ class GameState:
         if peek_dice or reveal_dice:
             summary['dice'] = self.current_dice
 
-        if peek_dice:
-            self.last_person_to_peek_at_dice = self.players_by_client[client].name
-
-        if reveal_dice:
-            self.last_person_to_peek_at_dice = 'Everyone!'
 
         return summary
 
@@ -236,6 +237,10 @@ def game_socket(ws):
         state_changed = False
         if parsed['method'] == 'set_name':
             state_changed = gs.add_player(ws.handler.client_address, parsed['name'])
+
+        elif parsed['method'] == 'init_state':
+            summary = gs.summarize_state_for_client(ws.handler.client_address)
+            ws.handler.active_client.ws.send(json.dumps(summary))
 
         elif parsed['method'] == 'peek_dice':
             summary = gs.summarize_state_for_client(ws.handler.client_address, peek_dice=True)
