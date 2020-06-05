@@ -238,7 +238,7 @@ def game_socket(ws):
         if parsed['method'] == 'set_name':
             state_changed = gs.add_player(ws.handler.client_address, parsed['name'])
 
-        elif parsed['method'] == 'init_state':
+        elif parsed['method'] == 'get_state':
             summary = gs.summarize_state_for_client(ws.handler.client_address)
             ws.handler.active_client.ws.send(json.dumps(summary))
 

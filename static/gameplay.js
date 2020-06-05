@@ -12,6 +12,8 @@ var lastPersonToRoll = '';
 var lastPersonToPeek = '';
 var dice = [null, null];
 
+var intervalID;
+
 var updateState = function(stateStr) {
   var formEl = document.querySelector('#form');
   var diceEl = document.querySelector('#dice');
@@ -46,10 +48,16 @@ var updateState = function(stateStr) {
 
 websocket.onopen = function() {
   console.log('Connected');
-  websocket.send(JSON.stringify({'method': 'init_state'}));
+  intervalID = window.setInterval(function() {
+    websocket.send(JSON.stringify({'method': 'get_state'}));
+  }, 1000);
 };
 
 websocket.onclose = function() {
+  if (intervalID) {
+    window.clearInterval(intervalID)
+    intervalID = null;
+  }
   console.log('Closed');
 };
 
