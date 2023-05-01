@@ -8,7 +8,7 @@ verify_ssl = true
 [packages]
 gunicorn = "==20.1.0"
 requests = "==2.25.1"
-Flask = "==1.1.4"
+Flask = "==2.3.2"
 Flask-Sockets = "==0.2.1"
 
 [requires]
