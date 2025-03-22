@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-gunicorn = "==22.0.0"
+gunicorn = "==23.0.0"
 requests = "==2.32.0"
 Flask = "==2.3.2"
 Flask-Sockets = "==0.2.1"
